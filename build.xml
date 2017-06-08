@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AntScript" default="run" basedir=".">
+	<!-- Sets variables which can later be used. -->
+	<property name="src.dir" location="." />
+	<property name="lib.dir" location="." />
+	<property name="build.dir" location="." />
+
+	<property file="Global Settings.properties" prefix="prop" />
+	<property name="application.name" value="${prop.ProjectName}" />
+	<property name="application.url" value="${prop.ApplicationUrl}" />
+	<property name="execution.type" value="${prop.RunConfiguration}" />
+
+	<tstamp>
+		<format property="build.time" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+
+	<fileset id="class.files" dir="${src.dir}">
+		<include name="**/*.class" />
+	</fileset>
+
+	<!-- Inspect the environment, to see if a deployment host is currently running. -->
+	<condition property="deployment.server.running" value="true" else="false">
+		<socket port="8081" server="127.0.0.1" />
+	</condition>
+
+	<!-- A connection to this URL is used when building javadoc. -->
+	<condition property="jdk.javadoc.visible" value="true" else="false">
+		<http url="http://java.sun.com/javase/6/docs/api/" />
+	</condition>
+
+<echo>
+----------------------------------------------- PROJECT SUMMARY ----------------------------------------------
+PROJECT NAME		: ${application.name}
+APPLICATION URL		: ${application.url}
+RUN DATE			: ${build.time}
+JAVA HOME			: ${java.home}
+DEPLOYMENT HOST RUNNING	: ${deployment.server.running}
+CONNECTED TO WEB		: ${jdk.javadoc.visible}
+--------------------------------------------------------------------------------------------------------------</echo>
+	
+	<path id="classpath.base" />
+	
+	<path id="classpath.test">
+		<pathelement location="." />
+		<pathelement location=".\supportlibraries\Framework_Core.jar" />
+		<pathelement location=".\supportlibraries\Framework_DataTable.jar" />
+		<pathelement location=".\supportlibraries\Framework_Reporting.jar" />
+		<pathelement location=".\supportlibraries\Framework_Utilities.jar" />
+		<pathelement location=".\supportlibraries\poi-3.8-20120326.jar" />
+		<pathelement location="C:\JavaLibs\Selenium\selenium-server-standalone-2.35.0.jar" />
+		<path refid="classpath.base" />
+	</path>
+	
+	<!-- runs main java code (allocator.Allocator) -->
+	<target name="run" description="Build and Run Selenium Testcases" depends="compile">
+<echo>EXECUTION TYPE	: ${execution.type}
+EXECUTION STATUS	: Started (in-progress)
+
+----------------------------------------- EXECUTION SUMMARY REPORT -------------------------------------------
+
+TESTCASE NAME		STATUS		TESTCASE DESCRIPTION
+--------------------------------------------------------------------------------------------------------------</echo>
+		<java fork="true" failonerror="true" classname="allocator.Allocator">
+			<classpath refid="classpath.test" />
+		</java>
+<echo>--------------------------------------------------------------------------------------------------------------
+
+EXECUTION STATUS	: Completed</echo>
+	</target>
+
+	<!-- runs Regression Selenium Testcases (allocator.Allocator) -->
+	<target name="regression" description="Build and Run Regression Selenium Testcases" depends="compile">
+<echo>EXECTION TYPE	: Regression
+EXECUTION STATUS	: Started (in-progress)
+
+----------------------------------------- EXECUTION SUMMARY REPORT -------------------------------------------
+
+TESTCASE NAME		STATUS		TESTCASE DESCRIPTION
+--------------------------------------------------------------------------------------------------------------</echo>
+		<java fork="true" failonerror="true" classname="allocator.Allocator">
+			<classpath refid="classpath.test" />
+			<arg value="Regression" />
+		</java>
+<echo>--------------------------------------------------------------------------------------------------------------
+
+EXECUTION STATUS	: Completed</echo>
+	</target>
+	
+	<!-- runs Sanity Selenium Testcases (allocator.Allocator) -->
+	<target name="sanity" description="Build and Run Sanity Selenium Testcases" depends="compile">
+<echo>EXECTION TYPE	: Sanity
+EXECUTION STATUS	: Started (in-progress)
+
+----------------------------------------- EXECUTION SUMMARY REPORT -------------------------------------------
+
+TESTCASE NAME		STATUS		TESTCASE DESCRIPTION
+--------------------------------------------------------------------------------------------------------------</echo>
+		<java fork="true" failonerror="true" classname="allocator.Allocator">
+			<classpath refid="classpath.test" />
+			<arg value="Sanity" />
+		</java>
+<echo>--------------------------------------------------------------------------------------------------------------
+
+EXECUTION STATUS	: Completed</echo>
+	</target>
+
+	<!-- delete the existing class files from the project directory-->
+	<target name="clean">
+		<echo message="cleaning - removing all existing class files..." />
+		<delete>
+			<fileset refid="class.files" />
+		</delete>
+	</target>
+
+	<!-- compiles the java code -->
+	<target name="compile" depends="clean">
+		<echo message="compiling all java files..." />
+		<javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false">
+			<classpath refid="classpath.test" />
+		</javac>
+	</target>
+
+</project>
